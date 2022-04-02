@@ -1,8 +1,9 @@
-from flask import Flask
+from flask import Flask, request, render_template
 from markupsafe import escape
 from flask import url_for
 
 app = Flask(__name__)
+
 
 @app.route("/")
 def hello_world():
@@ -13,14 +14,24 @@ def index():
     return "<p>Index Page</>"
 
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    return 'login'
+    if request.method == 'POST':
+        return do_the_login()
+    else:
+        return login_form()
+
+def do_the_login():
+    return '<h1>You Made It</h1>'
+
+def login_form():
+    return '<h1>Put login page here</h1>'
 
 
-@app.route("/<name>")
-def hello(name):
-    return f"Hello, {escape(name)}!"
+@app.route('/hello/')
+@app.route('/hello/<name>')
+def hello(name=None):
+    return render_template('hello.html', name=name)
 
 
 @app.route('/user/<username>')
@@ -40,9 +51,19 @@ def show_post(post_id):
     return f'Post {post_id}'
 
 
+@app.route('/path/<path:subpath>')
+def show_subpath(subpath):
+    # show the subpath after /path/
+    return f'Subpath {escape(subpath)}'
+
+
+
+
+
 with app.test_request_context():
     print(url_for('index'))
     print(url_for('login'))
     print(url_for('login', next='/'))
     print(url_for('profile', username='John Doe'))
     print(url_for('show_user_profile', name='test name'))
+
